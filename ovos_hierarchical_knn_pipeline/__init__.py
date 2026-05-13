@@ -84,17 +84,17 @@ class HierarchicalKNNIntentPipeline(ConfidenceMatcherPipeline):
         self.intents: List[str] = []
         self.ignore_labels: List[str] = self.config.get("ignore_intents") or []
 
-        self.bus.on("mycroft.ready", self.handle_sync_intents)
-        self.bus.on("padatious:register_intent", self.handle_sync_intents)
-        self.bus.on("register_intent", self.handle_sync_intents)
-        self.bus.on("detach_intent", self.handle_sync_intents)
-        self.bus.on("detach_skill", self.handle_sync_intents)
-
         self._syncing = False
 
         # Seed the intent allowlist from whatever skills are already loaded.
         # Bus events will keep it in sync for skills that load/unload later.
         self._initial_intent_sync()
+
+        self.bus.on("mycroft.ready", self._handle_sync_intents)
+        self.bus.on("padatious:register_intent", self._handle_sync_intents)
+        self.bus.on("register_intent", self._handle_sync_intents)
+        self.bus.on("detach_intent", self._handle_sync_intents)
+        self.bus.on("detach_skill", self._handle_sync_intents)
 
     def _initial_intent_sync(self) -> None:
         """Query the adapt + padatious manifests once at startup.
@@ -137,16 +137,22 @@ class HierarchicalKNNIntentPipeline(ConfidenceMatcherPipeline):
             raise RuntimeError("Failed to retrieve intent names")
         return [i for i in res.data["intents"] if i not in self.ignore_labels]
 
-    def handle_sync_intents(self, message: Message) -> None:
+    def _handle_sync_intents(self, message: Message) -> None:
         if self._syncing:
             return
         self._syncing = True
         time.sleep(3)
         timeout = self.config.get("timeout", 1)
         try:
-            self.intents = list(
-                set(self._get_adapt_intents(timeout) + self._get_padatious_intents(timeout))
-            )
+            adapt = self._get_adapt_intents(timeout)
+        except RuntimeError:
+            LOG.debug("HierarchicalKNN: adapt manifest not available during sync")
+        try:
+            padatious = self._get_padatious_intents(timeout)
+        except RuntimeError:
+            LOG.debug("HierarchicalKNN: padatious manifest not available during sync")
+        if adapt or padatious:
+            self.intents = list(set(adapt + padatious))
             LOG.debug(f"HierarchicalKNN registered intents: {len(self.intents)}")
 
             # Restrict L1 search to the domains of loaded skills.
@@ -156,8 +162,6 @@ class HierarchicalKNNIntentPipeline(ConfidenceMatcherPipeline):
             active_domains |= {label.split(":")[0] for label in _SPECIAL_LABELS}
             self.model.set_active_domains(list(active_domains))
             LOG.debug(f"HierarchicalKNN active domains: {sorted(active_domains)}")
-        except RuntimeError:
-            pass
         self._syncing = False
 
     def _allowed_special_labels(self, message: Optional[Message]) -> set:
