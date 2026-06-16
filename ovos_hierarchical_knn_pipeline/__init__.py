@@ -143,6 +143,8 @@ class HierarchicalKNNIntentPipeline(ConfidenceMatcherPipeline):
         self._syncing = True
         time.sleep(3)
         timeout = self.config.get("timeout", 1)
+        adapt = []
+        padatious = []
         try:
             adapt = self._get_adapt_intents(timeout)
         except RuntimeError:
