@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ovos_hierarchical_knn_pipeline"
+dynamic = ["version"]
+description = "Hierarchical KNN intent engine for OVOS, powered by IBM Granite embeddings"
+readme = "README.md"
+license = {text = "Apache-2.0"}
+authors = [
+    {name = "Flávio De Melo"}
+]
+keywords = ["natural language processing"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Topic :: Text Processing :: Linguistic",
+    "License :: OSI Approved :: Apache Software License"
+]
+dependencies = [
+    "ovos-workshop>=0.1.7,<9.0.0",
+    "ovos-plugin-manager>=2.1.0,<3.0.0",
+    "ovos-bus-client<3.0.0",
+    "ovos-config",
+    "ovos-utils>=0.3.4,<1.0.0",
+    "numpy",
+    "faiss-cpu",
+    "onnxruntime",
+    "tokenizers",
+    "tqdm"
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "ovoscope<1.0.0"
+]
+
+[project.urls]
+Homepage = "https://github.com/femelo/ovos-hierarchical-knn-pipeline"
+
+[project.entry-points."opm.pipeline"]
+"ovos-hierarchical-knn-pipeline" = "ovos_hierarchical_knn_pipeline:HierarchicalKNNIntentPipeline"
+
+[tool.setuptools.dynamic]
+version = {attr = "ovos_hierarchical_knn_pipeline.version.__version__"}
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["ovos_hierarchical_knn_pipeline*"]

@@ -117,7 +117,7 @@ class TestHandleSyncIntents(unittest.TestCase):
         p = _make_pipeline()
         p._syncing = True
         p._get_adapt_intents = MagicMock()
-        p.handle_sync_intents(Message("test"))
+        p._handle_sync_intents(Message("test"))
         p._get_adapt_intents.assert_not_called()
 
     def test_syncs_intents(self):
@@ -126,7 +126,7 @@ class TestHandleSyncIntents(unittest.TestCase):
         p._get_padatious_intents = MagicMock(return_value=["skill:pad_intent"])
         with patch("ovos_hierarchical_knn_pipeline.time") as mock_time:
             mock_time.sleep = MagicMock()
-            p.handle_sync_intents(Message("test"))
+            p._handle_sync_intents(Message("test"))
         self.assertIn("skill:adapt_intent", p.intents)
         self.assertIn("skill:pad_intent", p.intents)
         self.assertFalse(p._syncing)
@@ -136,7 +136,7 @@ class TestHandleSyncIntents(unittest.TestCase):
         p._get_adapt_intents = MagicMock(side_effect=RuntimeError("bus timeout"))
         with patch("ovos_hierarchical_knn_pipeline.time") as mock_time:
             mock_time.sleep = MagicMock()
-            p.handle_sync_intents(Message("test"))
+            p._handle_sync_intents(Message("test"))
         self.assertFalse(p._syncing)
 
 
