@@ -19,7 +19,7 @@ classifiers = [
     "License :: OSI Approved :: Apache Software License"
 ]
 dependencies = [
-    "ovos-workshop>=0.1.7,<9.0.0",
+    "ovos-workshop>=0.1.7,<10.0.0",
     "ovos-plugin-manager>=2.1.0,<3.0.0",
     "ovos-bus-client<3.0.0",
     "ovos-config",
