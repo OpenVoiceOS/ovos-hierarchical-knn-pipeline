@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.0.3a1](https://github.com/OpenVoiceOS/ovos-hierarchical-knn-pipeline/tree/0.0.3a1) (2026-06-27)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-hierarchical-knn-pipeline/compare/0.0.2a1...0.0.3a1)
+
+**Merged pull requests:**
+
+- fix\(deps\): allow ovos-workshop 9.x \(widen \<9.0.0 -\> \<10.0.0\) [\#8](https://github.com/OpenVoiceOS/ovos-hierarchical-knn-pipeline/pull/8) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [0.0.2a1](https://github.com/OpenVoiceOS/ovos-hierarchical-knn-pipeline/tree/0.0.2a1) (2026-06-16)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-hierarchical-knn-pipeline/compare/21af84c4209f36bf88dee0d1cef78d1221b6e481...0.0.2a1)
