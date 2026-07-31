@@ -1,6 +1,6 @@
 # API Reference
 
-This document covers the public Python API for the classifier and encoder abstractions. It is intended for developers who want to use these components outside of the OVOS plugin system, build custom pipelines, or run batch inference.
+This document covers the public Python API for the classifier and encoder abstractions. It is for developers who want to use these components outside of the OVOS plugin system, build custom pipelines, or run batch inference.
 
 ---
 
@@ -34,17 +34,17 @@ HierarchicalPairKNNClassifier(
 | Parameter | Description |
 |---|---|
 | `classes` | All intent label strings that will appear in the index. Format: `"domain:intent"`. |
-| `k` | Number of nearest neighbours retrieved per k-NN search. Wu-Lin uses a dynamic effective k based on the margin, so this is an upper bound. |
+| `k` | Number of nearest neighbors retrieved per k-NN search. Wu-Lin uses a dynamic effective k based on the margin, so this is an upper bound. |
 | `n` | Number of top domains passed from L1 to L2. |
 | `sep` | Separator character between hierarchy levels. |
-| `nlist` | IVF quantiser centroids. Ignored for small datasets (flat index used instead). |
-| `pq_m` | PQ sub-quantisers (bytes per vector). Lower = faster, less accurate. |
-| `nprobe` | IVF cells probed at search time. Higher = more accurate, slower. |
+| `nlist` | IVF quantizer centroids. Ignored for small datasets (flat index used instead). |
+| `pq_m` | PQ sub-quantizers (bytes per vector). Lower means faster, less accurate. |
+| `nprobe` | IVF cells probed at search time. Higher means more accurate, slower. |
 | `model_path` | Path to the encoder model directory. |
-| `gamma` | Distance decay rate for Wu-Lin weighting. `0` = uniform (ignore distance). |
-| `tau` | Exact-match distance threshold. Nearest neighbours closer than this win 100%. |
-| `margin` | Shell half-width for the adaptive neighbourhood. |
-| `anchor_to_global` | Anchor margin to the global nearest neighbour across all domains. |
+| `gamma` | Distance decay rate for Wu-Lin weighting. `0` means uniform (ignore distance). |
+| `tau` | Exact-match distance threshold. Nearest neighbors closer than this win 100%. |
+| `margin` | Shell half-width for the adaptive neighborhood. |
+| `anchor_to_global` | Anchor margin to the global nearest neighbor across all domains. |
 | `renormalize` | Re-scale probabilities to sum to 1 after filtering. |
 | `encoder_file` | ONNX filename override. Auto-detected when `None`. |
 
@@ -59,7 +59,7 @@ HierarchicalPairKNNClassifier(
 def from_disk(cls, index_dir: str | Path) -> HierarchicalPairKNNClassifier
 ```
 
-Load a pre-built index from a local directory. All hyperparameters are restored from `meta.pkl`.
+Load a pre-built index from a local directory. This restores all hyperparameters from `meta.pkl`.
 
 ```python
 clf = HierarchicalPairKNNClassifier.from_disk("/opt/ovos-knn-index")
@@ -78,7 +78,7 @@ def from_pretrained(
 ) -> HierarchicalPairKNNClassifier
 ```
 
-Download a pre-built index from HuggingFace and load it. The snapshot is cached locally after the first download.
+Download a pre-built index from HuggingFace and load it. The snapshot stays in the local cache after the first download.
 
 ```python
 clf = HierarchicalPairKNNClassifier.from_pretrained()
@@ -101,10 +101,10 @@ def build(
 ) -> None
 ```
 
-Build the FAISS index from training data and save all artefacts to `index_dir`.
+Build the FAISS index from training data and save all artifacts to `index_dir`.
 
 - Pass `documents` (raw text) to have the encoder compute embeddings.
-- Pass `embeddings` (pre-computed float32, shape `[N, dim]`, L2-normalised) to skip encoding. `documents` can be `None` in this case.
+- Pass `embeddings` (pre-computed float32, shape `[N, dim]`, L2-normalized) to skip encoding. `documents` can be `None` in this case.
 - Pass both to override encoding with pre-computed embeddings while keeping text metadata.
 
 ```python
@@ -132,8 +132,8 @@ def predict_proba(
 Return a probability distribution over intent labels for each input.
 
 - `documents`: list of strings (auto-encoded) or float32 numpy array of shape `[N, dim]` (pre-encoded).
-- `level`: maximum hierarchy depth to predict. `None` = full depth. `1` = domain only.
-- Returns: list of dicts mapping label string → probability float.
+- `level`: maximum hierarchy depth to predict. `None` means full depth. `1` means domain only.
+- Returns: a list of dicts mapping label string to probability float.
 
 ```python
 results = clf.predict_proba(["play some jazz", "what time is it"])
@@ -185,7 +185,7 @@ results = clf.predict_proba(["what time is it"])
 def get_depth(self) -> int
 ```
 
-Return the number of hierarchy levels in the label format (e.g. `2` for `domain:intent`).
+Return the number of hierarchy levels in the label format (for example `2` for `domain:intent`).
 
 ---
 
@@ -198,7 +198,7 @@ Return the number of hierarchy levels in the label format (e.g. `2` for `domain:
 def encoder(self) -> AnyEncoder
 ```
 
-Lazily initialised encoder. Auto-detected from the `model_path` directory. See [Encoders](encoders.md).
+Lazily initialized encoder. Auto-detected from the `model_path` directory. See [Encoders](encoders.md).
 
 ---
 
@@ -208,7 +208,7 @@ Lazily initialised encoder. Auto-detected from the `model_path` directory. See [
 from ovos_hierarchical_knn_pipeline import HierarchicalKNNIntentPipeline
 ```
 
-This class is the OVOS pipeline plugin. It is normally instantiated by the OVOS plugin manager. You can also instantiate it directly for testing.
+This class is the OVOS pipeline plugin. The OVOS plugin manager normally instantiates it. You can also instantiate it directly for testing.
 
 ### Constructor
 
@@ -216,7 +216,7 @@ This class is the OVOS pipeline plugin. It is normally instantiated by the OVOS 
 HierarchicalKNNIntentPipeline(bus: MessageBusClient, config: dict | None = None)
 ```
 
-Config keys are described in [Configuration Reference](configuration.md).
+[Configuration Reference](configuration.md) describes the config keys.
 
 ### Methods
 
@@ -236,7 +236,7 @@ Each method:
 
 | Field | Content |
 |---|---|
-| `match_type` | Intent label string (e.g. `"ocp:play"`) |
+| `match_type` | Intent label string (for example `"ocp:play"`) |
 | `match_data` | `{"utterance": str, "confidence": float}` |
 | `skill_id` | Skill package name derived from the domain |
 | `utterance` | The matched utterance string |
@@ -264,3 +264,6 @@ for utt, probs in zip(utterances, clf.predict_proba(utterances)):
     top = max(probs, key=probs.get)
     print(f"{utt!r:40s} → {top} ({probs[top]:.2f})")
 ```
+
+---
+[← Architecture](architecture.md) · [Home](index.md) · [Training →](training.md)
