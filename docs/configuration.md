@@ -49,7 +49,7 @@ All options live under `intents.ovos_hierarchical_knn_pipeline` in `mycroft.conf
 
 Path to a local directory containing a pre-built index. When set, `hf_repo_id` and `hf_cache_dir` are ignored. The directory must contain `index.faiss`, `label_ids.npy`, `class_names.npy`, `class_to_train_ids.pkl`, `meta.pkl`, and the encoder model files.
 
-Use this for air-gapped deployments or when you have built a custom index.
+Use this for air-gapped deployments or when you built a custom index.
 
 ---
 
@@ -83,9 +83,9 @@ Local directory for the downloaded HuggingFace snapshot. Ignored when `index_dir
 | Default | `0.7` |
 | Range | `0.0 – 1.0` |
 
-Minimum confidence score required for a match returned by `match_high` (the `ovos-hierarchical-knn-pipeline-high` pipeline stage). Utterances that score below this threshold are passed to the next stage.
+Minimum confidence score needed for a match returned by `match_high` (the `ovos-hierarchical-knn-pipeline-high` pipeline stage). Utterances that score below this threshold pass to the next stage.
 
-Increasing this value makes the high stage more conservative; decreasing it makes it more aggressive.
+A higher value makes the high stage more conservative. A lower value makes it more aggressive.
 
 ---
 
@@ -120,9 +120,9 @@ Minimum confidence for `match_low` (the `ovos-hierarchical-knn-pipeline-low` sta
 | Type | `list[string]` |
 | Default | `[]` |
 
-List of intent labels to suppress. Labels in this list are treated as if they were not registered, so the pipeline skips them and considers the next best prediction.
+List of intent labels to suppress. The pipeline treats labels in this list as if they were not registered, so it skips them and considers the next best prediction.
 
-Example — suppress the OCP play intent so it is always handled by the OCP pipeline stage:
+Example: suppress the OCP play intent so the OCP pipeline stage always handles it.
 
 ```json
 "ignore_intents": ["ocp:play"]
@@ -137,11 +137,11 @@ Example — suppress the OCP play intent so it is always handled by the OCP pipe
 | Type | `bool` |
 | Default | `false` |
 
-When `false` (the default), the raw Wu-Lin probability the classifier produced is returned. The classifier (`HierarchicalPairKNNClassifier`) already renormalises internally over its full search context, so this preserves information about how confident the classifier was overall — including the fact that probability mass was assigned to intents that aren't currently registered.
+When `false` (the default), the pipeline returns the raw Wu-Lin probability the classifier produced. The classifier (`HierarchicalPairKNNClassifier`) already renormalizes internally over its full search context, so this preserves information about how confident the classifier was overall, including the fact that probability mass was assigned to intents that are not currently registered.
 
-When `true`, the surviving probabilities are re-scaled a *second* time so they sum to 1 over only the registered intents. This makes the visible candidates easier to compare against each other, but it discards the absolute-confidence signal: a weak match and a strong match both end up summing to 1.
+When `true`, the pipeline re-scales the surviving probabilities a second time so they sum to 1 over only the registered intents. This makes the visible candidates easier to compare against each other, but it discards the absolute-confidence signal: a weak match and a strong match both end up summing to 1.
 
-**Recommendation:** leave `false` to keep confidence semantics consistent across pipeline stages. Flip to `true` only when you specifically want the visible candidates to sum to 1 (e.g., for UI display).
+Leave this at `false` to keep confidence semantics consistent across pipeline stages. Set it to `true` only when you want the visible candidates to sum to 1, for example for UI display.
 
 ---
 
@@ -166,4 +166,7 @@ The plugin registers three pipeline stages:
 | `ovos-hierarchical-knn-pipeline-medium` | Confidence ≥ `conf_medium` |
 | `ovos-hierarchical-knn-pipeline-low` | Confidence ≥ `conf_low` |
 
-Include any combination of these in your `pipeline` list. Omitting a stage prevents the plugin from firing at that confidence tier.
+Include any combination of these stages in your `pipeline` list. Omitting a stage stops the plugin from firing at that confidence tier.
+
+---
+[← Getting Started](getting-started.md) · [Home](index.md) · [Architecture →](architecture.md)

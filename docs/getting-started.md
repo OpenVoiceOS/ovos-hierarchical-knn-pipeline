@@ -1,16 +1,16 @@
 # Getting Started
 
-This guide takes you from zero to a running OVOS Hierarchical KNN Pipeline in five minutes.
+This guide gets you from zero to a running OVOS Hierarchical KNN Pipeline in a few minutes.
 
 ---
 
 ## Prerequisites
 
 - Python 3.10 or later
-- An OVOS installation (ovos-core, ovos-workshop ≥ 0.1.7)
-- An **AVX2-capable CPU** (required for the default quantised encoder — most x86-64 CPUs since ~2013)
-- ~600 MB of free disk space (encoder ~94 MB + index ~466 MB)
-- Internet access on first run (to download the pre-built index from HuggingFace)
+- An OVOS installation (ovos-core, ovos-workshop 0.1.7 or later)
+- An AVX2-capable CPU (needed for the default quantized encoder; most x86-64 CPUs since about 2013 have it)
+- About 600 MB of free disk space (encoder about 94 MB, index about 466 MB)
+- Internet access on first run, to download the pre-built index from HuggingFace
 
 To check whether your CPU supports AVX2:
 
@@ -34,7 +34,7 @@ This installs the plugin and all runtime dependencies (`faiss-cpu`, `onnxruntime
 
 ## Basic configuration
 
-Open (or create) your `~/.config/mycroft/mycroft.conf` and add this section:
+Open (or create) `~/.config/mycroft/mycroft.conf` and add this section:
 
 ```json
 {
@@ -60,7 +60,7 @@ Open (or create) your `~/.config/mycroft/mycroft.conf` and add this section:
 }
 ```
 
-On first start, the plugin downloads the pre-built index from HuggingFace (~560 MB). Subsequent starts load from the local HuggingFace cache.
+On first start, the plugin downloads the pre-built index from HuggingFace (about 560 MB). Later starts load from the local HuggingFace cache.
 
 ---
 
@@ -101,7 +101,7 @@ After starting OVOS, look for this log line:
 INFO  HierarchicalKNNIntentPipeline  Loaded index from /path/to/index
 ```
 
-You can also emit a test utterance via the message bus:
+You can also emit a test utterance over the message bus:
 
 ```python
 from ovos_bus_client import MessageBusClient
@@ -119,9 +119,9 @@ bus.emit(Message("recognizer_loop:utterance", {
 
 ## Pipeline position
 
-The KNN pipeline can sit at any position relative to Adapt and Padatious. The recommended layout above places it **before** the deterministic engines at each confidence tier so it gets first refusal on ambiguous utterances, while still deferring to exact-match engines when they fire.
+The KNN pipeline can sit at any position relative to Adapt and Padatious. The layout above places it before the deterministic engines at each confidence tier, so it gets first refusal on ambiguous utterances while still deferring to exact-match engines when they fire.
 
-You can also place it **after** all deterministic stages so it only fires when nothing else matched:
+You can also place it after all deterministic stages, so it fires only when nothing else matched:
 
 ```json
 "pipeline": [
@@ -137,3 +137,6 @@ You can also place it **after** all deterministic stages so it only fires when n
 ```
 
 See [Configuration Reference](configuration.md) for all options.
+
+---
+[Home](index.md) · [Configuration →](configuration.md)

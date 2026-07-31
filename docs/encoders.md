@@ -1,6 +1,6 @@
 # Encoders
 
-The encoder converts text strings into fixed-dimensional float32 embeddings that are fed into the FAISS index. The library ships three encoder implementations and auto-detects which one to use based on the files present in the model directory.
+The encoder converts text strings into fixed-dimensional float32 embeddings that feed into the FAISS index. The library ships three encoder implementations and auto-detects which one to use based on the files present in the model directory.
 
 ---
 
@@ -14,9 +14,9 @@ enc = load_encoder("/path/to/model")
 
 The detection order is:
 
-1. If `onnx/model_q4.onnx` exists → `EmbeddingGemmaEncoder`
-2. Else if `model_quint8_avx2.onnx`, `model_uint8.onnx`, or `model.onnx` exists → `GraniteEncoder`
-3. Else → `StaticModelEncoder`
+1. If `onnx/model_q4.onnx` exists, the loader uses `EmbeddingGemmaEncoder`.
+2. Else if `model_quint8_avx2.onnx`, `model_uint8.onnx`, or `model.onnx` exists, it uses `GraniteEncoder`.
+3. Otherwise it uses `StaticModelEncoder`.
 
 You can override auto-detection by passing `onnx_filename`:
 
@@ -30,14 +30,14 @@ enc = load_encoder("/path/to/model", onnx_filename="model_uint8.onnx")
 
 Wraps IBM Granite Embedding 97M Multilingual R2 in ONNX format.
 
-- **Pooling:** CLS token
-- **Dimension:** 384
-- **No prefix distinction** between documents and queries
-- **ONNX variants** (checked in order):
-  - `model_quint8_avx2.onnx` — uint8 quantised, requires AVX2 CPU (fastest, default)
-  - `model_uint8.onnx` — uint8 quantised, no AVX2 requirement
-  - `model.onnx` — full float32 (largest, highest precision)
-- **Tokeniser:** `tokenizer.json` in model directory (using the `tokenizers` library)
+- Pooling: CLS token
+- Dimension: 384
+- No prefix distinction between documents and queries
+- ONNX variants (checked in order):
+  - `model_quint8_avx2.onnx`: uint8 quantized, needs an AVX2 CPU (fastest, default)
+  - `model_uint8.onnx`: uint8 quantized, no AVX2 requirement
+  - `model.onnx`: full float32 (largest, highest precision)
+- Tokenizer: `tokenizer.json` in the model directory (using the `tokenizers` library)
 
 This is the default encoder for the pre-built index.
 
@@ -45,16 +45,16 @@ This is the default encoder for the pre-built index.
 
 ## `EmbeddingGemmaEncoder`
 
-Wraps an EmbeddingGemma ONNX model (Q4_0 quantised).
+Wraps an EmbeddingGemma ONNX model (Q4_0 quantized).
 
-- **Pooling:** varies by model
-- **Dimension:** model-dependent
-- **Prefix distinction:**
+- Pooling: varies by model
+- Dimension: model-dependent
+- Prefix distinction:
   - Documents: `"title: none | text: <text>"`
   - Queries: `"task: search result | query: <text>"`
-- **Tokeniser:** loaded via HuggingFace `transformers`
+- Tokenizer: loaded through HuggingFace `transformers`
 
-Use this encoder when your model directory contains `onnx/model_q4.onnx`.
+The loader picks this encoder when your model directory contains `onnx/model_q4.onnx`.
 
 ---
 
@@ -62,12 +62,12 @@ Use this encoder when your model directory contains `onnx/model_q4.onnx`.
 
 Wraps a `model2vec` static embedding model.
 
-- **Pooling:** mean pooling (no attention needed)
-- **Dimension:** 64 (typical)
-- **No prefix distinction**
-- **Fastest** of the three; lowest precision
+- Pooling: mean pooling (no attention needed)
+- Dimension: 64 (typical)
+- No prefix distinction
+- The fastest of the three, with the lowest precision
 
-Auto-detected when no ONNX files are found. Useful for experimentation with smaller models.
+The loader auto-detects this encoder when no ONNX files are found. It is useful for experimenting with smaller models.
 
 ---
 
@@ -108,13 +108,13 @@ print(embeddings.shape)   # (2, 384)
 print(embeddings.dtype)   # float32
 ```
 
-Returned embeddings are L2-normalised.
+Returned embeddings are L2-normalized.
 
 ---
 
 ## Downloading the default encoder
 
-The encoder is bundled inside the HuggingFace snapshot downloaded by `from_pretrained()`. If you need just the encoder without the FAISS index:
+The HuggingFace snapshot that `from_pretrained()` downloads bundles the encoder. If you need just the encoder without the FAISS index:
 
 ```bash
 python -c "
@@ -125,3 +125,6 @@ snapshot_download(
 )
 "
 ```
+
+---
+[← Training](training.md) · [Home](index.md) · [Testing →](testing.md)
