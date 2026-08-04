@@ -134,9 +134,29 @@ class TestHandleSyncIntents(unittest.TestCase):
     def test_handles_runtime_error_gracefully(self):
         p = _make_pipeline()
         p._get_adapt_intents = MagicMock(side_effect=RuntimeError("bus timeout"))
+        p._get_padatious_intents = MagicMock(side_effect=RuntimeError("bus timeout"))
         with patch("ovos_hierarchical_knn_pipeline.time") as mock_time:
             mock_time.sleep = MagicMock()
             p._handle_sync_intents(Message("test"))
+        self.assertFalse(p._syncing)
+
+    def test_syncs_available_manifest_when_one_times_out(self):
+        p = _make_pipeline()
+        p._get_adapt_intents = MagicMock(side_effect=RuntimeError("bus timeout"))
+        p._get_padatious_intents = MagicMock(return_value=["skill:pad_intent"])
+        with patch("ovos_hierarchical_knn_pipeline.time") as mock_time:
+            mock_time.sleep = MagicMock()
+            p._handle_sync_intents(Message("test"))
+        self.assertEqual(p.intents, ["skill:pad_intent"])
+        self.assertFalse(p._syncing)
+
+    def test_unexpected_error_does_not_latch_syncing(self):
+        p = _make_pipeline()
+        p._get_adapt_intents = MagicMock(side_effect=ValueError("bad manifest"))
+        with patch("ovos_hierarchical_knn_pipeline.time") as mock_time:
+            mock_time.sleep = MagicMock()
+            with self.assertRaises(ValueError):
+                p._handle_sync_intents(Message("test"))
         self.assertFalse(p._syncing)
 
 
@@ -437,4 +457,3 @@ class TestSpecialLabelGating(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

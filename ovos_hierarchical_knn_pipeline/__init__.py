@@ -141,30 +141,32 @@ class HierarchicalKNNIntentPipeline(ConfidenceMatcherPipeline):
         if self._syncing:
             return
         self._syncing = True
-        time.sleep(3)
-        timeout = self.config.get("timeout", 1)
-        adapt = []
-        padatious = []
         try:
-            adapt = self._get_adapt_intents(timeout)
-        except RuntimeError:
-            LOG.debug("HierarchicalKNN: adapt manifest not available during sync")
-        try:
-            padatious = self._get_padatious_intents(timeout)
-        except RuntimeError:
-            LOG.debug("HierarchicalKNN: padatious manifest not available during sync")
-        if adapt or padatious:
-            self.intents = list(set(adapt + padatious))
-            LOG.debug(f"HierarchicalKNN registered intents: {len(self.intents)}")
+            time.sleep(3)
+            timeout = self.config.get("timeout", 1)
+            adapt: List[str] = []
+            padatious: List[str] = []
+            try:
+                adapt = self._get_adapt_intents(timeout)
+            except RuntimeError:
+                LOG.debug("HierarchicalKNN: adapt manifest not available during sync")
+            try:
+                padatious = self._get_padatious_intents(timeout)
+            except RuntimeError:
+                LOG.debug("HierarchicalKNN: padatious manifest not available during sync")
+            if adapt or padatious:
+                self.intents = list(set(adapt + padatious))
+                LOG.debug(f"HierarchicalKNN registered intents: {len(self.intents)}")
 
-            # Restrict L1 search to the domains of loaded skills.
-            # Always include the special-label domains so ocp/common_query/stop
-            # remain reachable even when no skill explicitly registers them.
-            active_domains = {i.split(":")[0] for i in self.intents if ":" in i}
-            active_domains |= {label.split(":")[0] for label in _SPECIAL_LABELS}
-            self.model.set_active_domains(list(active_domains))
-            LOG.debug(f"HierarchicalKNN active domains: {sorted(active_domains)}")
-        self._syncing = False
+                # Restrict L1 search to the domains of loaded skills.
+                # Always include the special-label domains so ocp/common_query/stop
+                # remain reachable even when no skill explicitly registers them.
+                active_domains = {i.split(":")[0] for i in self.intents if ":" in i}
+                active_domains |= {label.split(":")[0] for label in _SPECIAL_LABELS}
+                self.model.set_active_domains(list(active_domains))
+                LOG.debug(f"HierarchicalKNN active domains: {sorted(active_domains)}")
+        finally:
+            self._syncing = False
 
     def _allowed_special_labels(self, message: Optional[Message]) -> set:
         """Return the special labels enabled by the caller's session pipeline.
@@ -275,4 +277,3 @@ class HierarchicalKNNIntentPipeline(ConfidenceMatcherPipeline):
                 utterance=utterances[0],
             )
         return None
-
