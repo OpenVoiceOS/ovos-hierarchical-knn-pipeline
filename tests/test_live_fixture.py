@@ -20,18 +20,19 @@ from pathlib import Path
 
 import pytest
 
-if os.environ.get("OVOSCOPE_LIVE") != "1":
-    pytest.skip(
-        "Live model test skipped; set OVOSCOPE_LIVE=1 to enable.",
-        allow_module_level=True,
-    )
+LIVE_TESTS_ENABLED = os.environ.get("OVOSCOPE_LIVE") == "1"
 
-pytest.importorskip("ovoscope", reason="ovoscope not installed")
+# Import the live-only stack only when the suite explicitly opts in. A
+# module-level pytest.skip here interacts badly with ovoscope's module
+# collection hook: the skip escapes while the hook imports this module and
+# prevents pytest from discovering the repository's ordinary unit tests.
+if LIVE_TESTS_ENABLED:
+    pytest.importorskip("ovoscope", reason="ovoscope not installed")
 
-from ovos_bus_client.message import Message  # noqa: E402
-from ovos_bus_client.session import Session  # noqa: E402
-from ovos_config.config import Configuration  # noqa: E402
-from ovoscope import get_minicroft  # noqa: E402
+    from ovos_bus_client.message import Message
+    from ovos_bus_client.session import Session
+    from ovos_config.config import Configuration
+    from ovoscope import get_minicroft
 
 FIXTURE = Path(__file__).parent / "fixtures" / "en_us_intents.jsonl"
 PIPELINE_ID = "ovos-hierarchical-knn-pipeline"
@@ -49,6 +50,10 @@ def _load_fixture():
     return cases
 
 
+@unittest.skipUnless(
+    LIVE_TESTS_ENABLED,
+    "Live model test skipped; set OVOSCOPE_LIVE=1 to enable.",
+)
 class TestLiveFixture(unittest.TestCase):
     """Real model, real bus, real dispatch."""
 
